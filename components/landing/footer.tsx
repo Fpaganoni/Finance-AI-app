@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Linkedin, Instagram } from 'lucide-react'
 
 const footerLinks = {
   producto: [
@@ -101,11 +102,11 @@ export function Footer() {
             © 2026 Aurum. Todos los derechos reservados.
           </p>
           <div className="flex items-center gap-6">
-            <Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              LinkedIn
+            <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="LinkedIn">
+              <Linkedin className="h-5 w-5" />
             </Link>
-            <Link href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Twitter
+            <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Instagram">
+              <Instagram className="h-5 w-5" />
             </Link>
           </div>
         </div>
