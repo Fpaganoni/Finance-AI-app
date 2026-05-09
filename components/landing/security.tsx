@@ -1,47 +1,28 @@
+import { getTranslations } from 'next-intl/server'
 import { Shield, Lock, FileCheck, Building2 } from 'lucide-react'
 
-const securityFeatures = [
-  {
-    icon: Lock,
-    title: 'Cifrado de extremo a extremo',
-    description: 'AES-256 en reposo y TLS 1.3 en tránsito. Sus datos solo son legibles por usted.',
-  },
-  {
-    icon: Shield,
-    title: 'Conexiones de solo lectura',
-    description: 'Nunca almacenamos credenciales bancarias. Acceso vía OAuth seguro con tokens revocables.',
-  },
-  {
-    icon: FileCheck,
-    title: 'Auditoría SOC 2 Tipo II',
-    description: 'Infraestructura certificada y revisada anualmente por auditores independientes.',
-  },
-  {
-    icon: Building2,
-    title: 'Custodia segregada',
-    description: 'Sus activos permanecen siempre en su entidad. Aurum nunca toca su capital.',
-  },
-]
+const featureIcons = [Lock, Shield, FileCheck, Building2]
+const featureKeys = ['encryption', 'readOnly', 'audit', 'custody'] as const
 
-export function Security() {
+export async function Security() {
+  const t = await getTranslations('security')
+
   return (
     <section id="seguridad" className="py-24 px-6 bg-primary text-primary-foreground">
       <div className="max-w-7xl mx-auto">
         <div className="grid lg:grid-cols-2 gap-16">
-          {/* Left column - Header and Vault */}
+          {/* Left column */}
           <div>
             <span className="text-sm font-medium tracking-widest text-accent uppercase">
-              Seguridad
+              {t('badge')}
             </span>
             <h2 className="mt-4 text-3xl sm:text-4xl md:text-5xl font-serif leading-tight">
-              Protección de grado
+              {t('headline1')}
               <br />
-              <span className="italic text-accent">institucional.</span>
+              <span className="italic text-accent">{t('headline2')}</span>
             </h2>
             <p className="mt-6 text-primary-foreground/70 text-lg leading-relaxed max-w-md">
-              Diseñado desde el primer día con los estándares más exigentes de
-              la banca privada. Su privacidad y la de su patrimonio son
-              innegociables.
+              {t('description')}
             </p>
 
             {/* Vault card */}
@@ -51,10 +32,10 @@ export function Security() {
                   <Shield className="w-7 h-7 text-accent" />
                 </div>
                 <span className="text-xs font-medium tracking-widest text-accent uppercase">
-                  Bóveda Aurum
+                  {t('vaultLabel')}
                 </span>
                 <span className="mt-2 text-xl font-medium text-primary-foreground">
-                  256-bit · Zero Knowledge
+                  {t('vaultSpec')}
                 </span>
               </div>
             </div>
@@ -62,20 +43,25 @@ export function Security() {
 
           {/* Right column - Features grid */}
           <div className="grid sm:grid-cols-2 gap-6">
-            {securityFeatures.map((feature) => (
-              <div
-                key={feature.title}
-                className="bg-sidebar-accent rounded-xl p-6 hover:bg-sidebar-accent/80 transition-colors"
-              >
-                <div className="w-8 h-8 rounded-full bg-sidebar-accent border border-primary-foreground/20 flex items-center justify-center mb-4">
-                  <div className="w-2 h-2 rounded-full bg-primary-foreground/60" />
+            {featureKeys.map((key, index) => {
+              const Icon = featureIcons[index]
+              return (
+                <div
+                  key={key}
+                  className="bg-sidebar-accent rounded-xl p-6 hover:bg-sidebar-accent/80 transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-full bg-sidebar-accent border border-primary-foreground/20 flex items-center justify-center mb-4">
+                    <div className="w-2 h-2 rounded-full bg-primary-foreground/60" />
+                  </div>
+                  <h3 className="font-semibold text-primary-foreground mb-2">
+                    {t(`features.${key}.title`)}
+                  </h3>
+                  <p className="text-sm text-primary-foreground/60 leading-relaxed">
+                    {t(`features.${key}.description`)}
+                  </p>
                 </div>
-                <h3 className="font-semibold text-primary-foreground mb-2">{feature.title}</h3>
-                <p className="text-sm text-primary-foreground/60 leading-relaxed">
-                  {feature.description}
-                </p>
-              </div>
-            ))}
+              )
+            })}
           </div>
         </div>
       </div>

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Send, Sparkles, ChevronRight, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 interface Message {
   id: string
@@ -9,24 +10,16 @@ interface Message {
   content: string
 }
 
-const initialMessages: Message[] = [
-  {
-    id: '1',
-    role: 'assistant',
-    content: 'Buenos días, María. He detectado una oportunidad de optimización fiscal en su cartera de acciones. ¿Le gustaría revisarla?',
-  },
-]
-
-const suggestions = [
-  'Analizar mi exposición al riesgo',
-  'Optimizar mi cartera',
-  'Revisar flujo de caja',
-]
-
 export function AIAdvisor() {
-  const [messages, setMessages] = useState<Message[]>(initialMessages)
+  const t = useTranslations('dashboard.aiAdvisor')
+
+  const [messages, setMessages] = useState<Message[]>([
+    { id: '1', role: 'assistant', content: t('initialMessage') },
+  ])
   const [input, setInput] = useState('')
   const [isExpanded, setIsExpanded] = useState(true)
+
+  const suggestions = t.raw('suggestionsList') as string[]
 
   const handleSend = () => {
     if (!input.trim()) return
@@ -36,16 +29,14 @@ export function AIAdvisor() {
       role: 'user',
       content: input,
     }
-
     setMessages((prev) => [...prev, userMessage])
     setInput('')
 
-    // Simulate AI response
     setTimeout(() => {
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: 'Entendido. Estoy analizando sus datos financieros para proporcionarle una recomendación personalizada. Un momento, por favor.',
+        content: t('aiResponse'),
       }
       setMessages((prev) => [...prev, assistantMessage])
     }, 1000)
@@ -75,8 +66,8 @@ export function AIAdvisor() {
             <Sparkles className="w-4 h-4 text-accent" />
           </div>
           <div>
-            <p className="text-sm font-medium text-foreground">Asesor IA</p>
-            <p className="text-xs text-success">En línea</p>
+            <p className="text-sm font-medium text-foreground">{t('title')}</p>
+            <p className="text-xs text-success">{t('online')}</p>
           </div>
         </div>
         <button
@@ -110,7 +101,7 @@ export function AIAdvisor() {
       {/* Suggestions */}
       {messages.length <= 2 && (
         <div className="px-4 pb-2">
-          <p className="text-xs text-muted-foreground mb-2">Sugerencias</p>
+          <p className="text-xs text-muted-foreground mb-2">{t('suggestions')}</p>
           <div className="flex flex-wrap gap-2">
             {suggestions.map((suggestion) => (
               <button
@@ -134,7 +125,7 @@ export function AIAdvisor() {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-            placeholder="Escribe tu pregunta..."
+            placeholder={t('placeholder')}
             className="flex-1 px-4 py-2.5 rounded-full bg-secondary text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
           />
           <button

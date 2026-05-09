@@ -1,28 +1,31 @@
-import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
+import { Link } from '@/i18n/navigation'
 import { Linkedin, Instagram } from 'lucide-react'
 
-const footerLinks = {
-  producto: [
-    { label: 'Integración', href: '#integracion' },
-    { label: 'Seguridad', href: '#seguridad' },
-    { label: 'IA Predictiva', href: '#precios' },
-    { label: 'Cambios', href: '#' },
-  ],
-  compania: [
-    { label: 'Acerca', href: '#acerca' },
-    { label: 'Equipo', href: '#' },
-    { label: 'Prensa', href: '#' },
-    { label: 'Carreras', href: '#' },
-  ],
-  legal: [
-    { label: 'Privacidad', href: '#' },
-    { label: 'Términos', href: '#' },
-    { label: 'Cumplimiento', href: '#' },
-    { label: 'SOC 2', href: '#' },
-  ],
-}
+export async function Footer() {
+  const t = await getTranslations('footer')
 
-export function Footer() {
+  const footerLinks = {
+    product: [
+      { key: 'integration', href: '#integracion' },
+      { key: 'security', href: '#seguridad' },
+      { key: 'predictiveAI', href: '#precios' },
+      { key: 'changelog', href: '#' },
+    ],
+    company: [
+      { key: 'about', href: '#acerca' },
+      { key: 'team', href: '#' },
+      { key: 'press', href: '#' },
+      { key: 'careers', href: '#' },
+    ],
+    legal: [
+      { key: 'privacy', href: '#' },
+      { key: 'terms', href: '#' },
+      { key: 'compliance', href: '#' },
+      { key: 'soc2', href: '#' },
+    ],
+  }
+
   return (
     <footer id="acerca" className="py-16 px-6 bg-background border-t border-border">
       <div className="max-w-7xl mx-auto">
@@ -34,24 +37,24 @@ export function Footer() {
               <span className="text-lg font-medium text-foreground">Aurum</span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed max-w-xs">
-              Gestión patrimonial inteligente para individuos exigentes y family offices.
+              {t('tagline')}
             </p>
           </div>
 
           {/* Product links */}
           <div>
             <h4 className="text-xs font-medium tracking-widest text-muted-foreground uppercase mb-4">
-              Producto
+              {t('columns.product')}
             </h4>
             <ul className="space-y-3">
-              {footerLinks.producto.map((link) => (
-                <li key={link.label}>
-                  <Link
+              {footerLinks.product.map((link) => (
+                <li key={link.key}>
+                  <a
                     href={link.href}
                     className="text-sm text-foreground hover:text-accent transition-colors"
                   >
-                    {link.label}
-                  </Link>
+                    {t(`links.product.${link.key}`)}
+                  </a>
                 </li>
               ))}
             </ul>
@@ -60,17 +63,17 @@ export function Footer() {
           {/* Company links */}
           <div>
             <h4 className="text-xs font-medium tracking-widest text-muted-foreground uppercase mb-4">
-              Compañía
+              {t('columns.company')}
             </h4>
             <ul className="space-y-3">
-              {footerLinks.compania.map((link) => (
-                <li key={link.label}>
-                  <Link
+              {footerLinks.company.map((link) => (
+                <li key={link.key}>
+                  <a
                     href={link.href}
                     className="text-sm text-foreground hover:text-accent transition-colors"
                   >
-                    {link.label}
-                  </Link>
+                    {t(`links.company.${link.key}`)}
+                  </a>
                 </li>
               ))}
             </ul>
@@ -79,17 +82,17 @@ export function Footer() {
           {/* Legal links */}
           <div>
             <h4 className="text-xs font-medium tracking-widest text-muted-foreground uppercase mb-4">
-              Legal
+              {t('columns.legal')}
             </h4>
             <ul className="space-y-3">
               {footerLinks.legal.map((link) => (
-                <li key={link.label}>
-                  <Link
+                <li key={link.key}>
+                  <a
                     href={link.href}
                     className="text-sm text-foreground hover:text-accent transition-colors"
                   >
-                    {link.label}
-                  </Link>
+                    {t(`links.legal.${link.key}`)}
+                  </a>
                 </li>
               ))}
             </ul>
@@ -98,16 +101,22 @@ export function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-16 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground">
-            © 2026 Aurum. Todos los derechos reservados.
-          </p>
+          <p className="text-sm text-muted-foreground">{t('copyright')}</p>
           <div className="flex items-center gap-6">
-            <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="LinkedIn">
+            <a
+              href="#"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="LinkedIn"
+            >
               <Linkedin className="h-5 w-5" />
-            </Link>
-            <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Instagram">
+            </a>
+            <a
+              href="#"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label="Instagram"
+            >
               <Instagram className="h-5 w-5" />
-            </Link>
+            </a>
           </div>
         </div>
       </div>

@@ -1,8 +1,8 @@
-import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
-import { Playfair_Display } from 'next/font/google'
+import type { Viewport } from 'next'
+import { Geist, Geist_Mono, Playfair_Display } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { ThemeProvider } from '@/components/theme-provider'
+import { headers } from 'next/headers'
 import './globals.css'
 
 const geistSans = Geist({
@@ -20,42 +20,22 @@ const playfair = Playfair_Display({
   variable: '--font-playfair',
 })
 
-export const metadata: Metadata = {
-  title: 'Aurum | Gestión Patrimonial Inteligente',
-  description: 'La gestión patrimonial, reimaginada con inteligencia. Aurum unifica todas sus cuentas, inversiones y activos en una sola interfaz.',
-  generator: 'v0.app',
-  icons: {
-    icon: [
-      {
-        url: '/icon-light-32x32.png',
-        media: '(prefers-color-scheme: light)',
-      },
-      {
-        url: '/icon-dark-32x32.png',
-        media: '(prefers-color-scheme: dark)',
-      },
-      {
-        url: '/icon.svg',
-        type: 'image/svg+xml',
-      },
-    ],
-    apple: '/apple-icon.png',
-  },
-}
-
 export const viewport: Viewport = {
   themeColor: '#0f172a',
   width: 'device-width',
   initialScale: 1,
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const headersList = await headers()
+  const locale = headersList.get('x-next-intl-locale') ?? 'es'
+
   return (
-    <html lang="es" className="bg-background" suppressHydrationWarning>
+    <html lang={locale} className="bg-background" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} font-sans antialiased`}>
         <ThemeProvider
           attribute="class"

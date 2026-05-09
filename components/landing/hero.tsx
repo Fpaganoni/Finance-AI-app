@@ -1,33 +1,33 @@
-import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
+import { Link } from '@/i18n/navigation'
 import { Button } from '@/components/ui/button'
 
 const pressLogos = ['FORBES', 'BLOOMBERG', 'FINANCIAL TIMES', 'THE ECONOMIST']
 
-export function Hero() {
+export async function Hero() {
+  const t = await getTranslations('hero')
+
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center px-6 pt-24 pb-16">
       {/* Badge */}
       <div className="flex items-center gap-2 px-4 py-2 rounded-full border border-border bg-card mb-8">
         <span className="w-2 h-2 rounded-full bg-accent" />
-        <span className="text-sm text-muted-foreground">
-          Por invitación · Para patrimonios desde €5M
-        </span>
+        <span className="text-sm text-muted-foreground">{t('badge')}</span>
       </div>
 
       {/* Headline */}
       <h1 className="text-center max-w-4xl">
         <span className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif text-foreground leading-tight">
-          La gestión patrimonial,
+          {t('headline1')}
         </span>
         <span className="block text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-serif italic text-accent leading-tight">
-          reimaginada con inteligencia.
+          {t('headline2')}
         </span>
       </h1>
 
       {/* Subheadline */}
       <p className="mt-8 text-center max-w-2xl text-muted-foreground text-lg leading-relaxed">
-        Aurum unifica todas sus cuentas, inversiones y activos en una sola
-        interfaz. Decisiones más claras, respaldadas por IA predictiva.
+        {t('subheadline')}
       </p>
 
       {/* CTAs */}
@@ -37,7 +37,7 @@ export function Hero() {
           size="lg"
           className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-8 h-12"
         >
-          <Link href="/dashboard">Solicitar acceso privado</Link>
+          <Link href="/dashboard">{t('cta1')}</Link>
         </Button>
         <Button
           asChild
@@ -45,7 +45,7 @@ export function Hero() {
           size="lg"
           className="rounded-full px-8 h-12 border-border hover:bg-secondary"
         >
-          <Link href="/dashboard">Ver demostración →</Link>
+          <Link href="/dashboard">{t('cta2')}</Link>
         </Button>
       </div>
 

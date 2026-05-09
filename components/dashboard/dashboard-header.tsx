@@ -1,9 +1,13 @@
 'use client'
 
 import { Bell, Search } from 'lucide-react'
+import { useTranslations, useLocale } from 'next-intl'
 
 export function DashboardHeader() {
-  const today = new Date().toLocaleDateString('es-ES', {
+  const t = useTranslations('dashboard.header')
+  const locale = useLocale()
+
+  const today = new Date().toLocaleDateString(locale, {
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -24,7 +28,7 @@ export function DashboardHeader() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Buscar..."
+            placeholder={t('search')}
             className="w-64 pl-10 pr-4 py-2 rounded-full bg-secondary text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
           />
         </div>

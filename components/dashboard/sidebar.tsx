@@ -1,7 +1,7 @@
 'use client'
 
-import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+import { Link, usePathname } from '@/i18n/navigation'
 import {
   LayoutDashboard,
   Wallet,
@@ -12,20 +12,21 @@ import {
   LogOut,
 } from 'lucide-react'
 
-const navItems = [
-  { href: '/dashboard', label: 'Resumen', icon: LayoutDashboard },
-  { href: '/dashboard/activos', label: 'Activos', icon: Wallet },
-  { href: '/dashboard/inversiones', label: 'Inversiones', icon: TrendingUp },
-  { href: '/dashboard/analisis', label: 'Análisis', icon: PieChart },
-]
-
-const bottomItems = [
-  { href: '/dashboard/configuracion', label: 'Configuración', icon: Settings },
-  { href: '/dashboard/ayuda', label: 'Ayuda', icon: HelpCircle },
-]
-
 export function DashboardSidebar() {
+  const t = useTranslations('dashboard.sidebar')
   const pathname = usePathname()
+
+  const navItems = [
+    { href: '/dashboard' as const, labelKey: 'nav.overview', icon: LayoutDashboard },
+    { href: '/dashboard/activos' as const, labelKey: 'nav.assets', icon: Wallet },
+    { href: '/dashboard/inversiones' as const, labelKey: 'nav.investments', icon: TrendingUp },
+    { href: '/dashboard/analisis' as const, labelKey: 'nav.analysis', icon: PieChart },
+  ]
+
+  const bottomItems = [
+    { href: '/dashboard/configuracion' as const, labelKey: 'bottom.settings', icon: Settings },
+    { href: '/dashboard/ayuda' as const, labelKey: 'bottom.help', icon: HelpCircle },
+  ]
 
   return (
     <aside className="w-64 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col">
@@ -41,7 +42,10 @@ export function DashboardSidebar() {
       <nav className="flex-1 px-3 py-4">
         <ul className="space-y-1">
           {navItems.map((item) => {
-            const isActive = pathname === item.href
+            const isActive =
+              item.href === '/dashboard'
+                ? pathname === '/dashboard'
+                : pathname.startsWith(item.href)
             return (
               <li key={item.href}>
                 <Link
@@ -53,7 +57,7 @@ export function DashboardSidebar() {
                   }`}
                 >
                   <item.icon className="w-5 h-5" />
-                  {item.label}
+                  {t(item.labelKey)}
                 </Link>
               </li>
             )
@@ -71,7 +75,7 @@ export function DashboardSidebar() {
                 className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors"
               >
                 <item.icon className="w-5 h-5" />
-                {item.label}
+                {t(item.labelKey)}
               </Link>
             </li>
           ))}
@@ -81,7 +85,7 @@ export function DashboardSidebar() {
               className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground transition-colors"
             >
               <LogOut className="w-5 h-5" />
-              Cerrar sesión
+              {t('bottom.logout')}
             </Link>
           </li>
         </ul>
@@ -95,10 +99,10 @@ export function DashboardSidebar() {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-sidebar-foreground truncate">
-              María García
+              {t('user.name')}
             </p>
             <p className="text-xs text-sidebar-foreground/60 truncate">
-              IA Predictiva
+              {t('user.plan')}
             </p>
           </div>
         </div>
