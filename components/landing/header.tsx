@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { ModeToggle } from '@/components/mode-toggle'
 
 const navLinks = [
   { href: '#integracion', label: 'Integración' },
@@ -40,6 +41,7 @@ export function Header() {
 
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-4">
+            <ModeToggle />
             <Link
               href="/dashboard"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
@@ -76,6 +78,10 @@ export function Header() {
                 </Link>
               ))}
               <div className="flex flex-col gap-2 pt-4 border-t border-border/50">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-muted-foreground">Tema</span>
+                  <ModeToggle />
+                </div>
                 <Link
                   href="/dashboard"
                   className="text-sm text-muted-foreground hover:text-foreground transition-colors"
