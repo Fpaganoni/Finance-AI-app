@@ -197,4 +197,6 @@ Made with ❤️ by Fpaganoni
 
 ![GitHub Last Commit](https://img.shields.io/github/last-commit/Fpaganoni/Finance-AI-app?style=flat-square) ![Repository Size](https://img.shields.io/github/repo-size/Fpaganoni/Finance-AI-app?style=flat-square)
 
+Live: soon..
+
 </div>
