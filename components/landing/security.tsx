@@ -34,7 +34,7 @@ export async function Security() {
                 <span className="text-xs font-medium tracking-widest text-accent uppercase">
                   {t('vaultLabel')}
                 </span>
-                <span className="mt-2 text-xl font-medium text-primary-foreground">
+                <span className="mt-2 text-xl font-medium text-sidebar-accent-foreground">
                   {t('vaultSpec')}
                 </span>
               </div>
@@ -50,13 +50,13 @@ export async function Security() {
                   key={key}
                   className="bg-sidebar-accent rounded-xl p-6 hover:bg-sidebar-accent/80 transition-colors"
                 >
-                  <div className="w-8 h-8 rounded-full bg-sidebar-accent border border-primary-foreground/20 flex items-center justify-center mb-4">
-                    <div className="w-2 h-2 rounded-full bg-primary-foreground/60" />
+                  <div className="w-8 h-8 rounded-full bg-sidebar border border-sidebar-border flex items-center justify-center mb-4">
+                    <Icon className="w-4 h-4 text-accent" />
                   </div>
-                  <h3 className="font-semibold text-primary-foreground mb-2">
+                  <h3 className="font-semibold text-sidebar-accent-foreground mb-2">
                     {t(`features.${key}.title`)}
                   </h3>
-                  <p className="text-sm text-primary-foreground/60 leading-relaxed">
+                  <p className="text-sm text-sidebar-accent-foreground/70 leading-relaxed">
                     {t(`features.${key}.description`)}
                   </p>
                 </div>
