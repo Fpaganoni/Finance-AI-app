@@ -148,3 +148,33 @@
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: oklch(0.75 0 0);
 }
+
+/* Animated metallic gold text for hero headline */
+.metallic-gold {
+  background: linear-gradient(
+    100deg,
+    oklch(0.55 0.13 75) 0%,
+    oklch(0.9 0.14 90) 22%,
+    oklch(0.76 0.15 75) 40%,
+    oklch(0.55 0.13 75) 55%,
+    oklch(0.9 0.14 90) 72%,
+    oklch(0.76 0.15 75) 100%
+  );
+  background-size: 250% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: metallic-sheen 7s ease-in-out infinite;
+}
+
+@keyframes metallic-sheen {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
