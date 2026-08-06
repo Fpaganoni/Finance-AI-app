@@ -1,16 +1,25 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Menu, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { Link } from '@/i18n/navigation'
 import { Button } from '@/components/ui/button'
 import { ModeToggle } from '@/components/mode-toggle'
 import { LanguageSwitcher } from '@/components/language-switcher'
+import { cn } from '@/lib/utils'
 
 export function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
   const t = useTranslations('header')
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 24)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   const navLinks = [
     { href: '#integracion', label: t('nav.integration') },
@@ -20,9 +29,21 @@ export function Header() {
   ]
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border/50">
-      <nav className="mx-auto max-w-7xl px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+    <header
+      className={cn(
+        'fixed left-1/2 -translate-x-1/2 z-50 transition-all duration-500 ease-out',
+        scrolled ? 'top-3 w-[min(94%,64rem)]' : 'top-0 w-full'
+      )}
+    >
+      <nav
+        className={cn(
+          'mx-auto max-w-7xl px-6 lg:px-8 transition-all duration-500 ease-out',
+          scrolled
+            ? 'rounded-full border border-border/60 bg-card/70 backdrop-blur-xl shadow-[0_8px_30px_-12px_oklch(0.13_0.028_261/0.35)]'
+            : 'border-b border-border/50 bg-background/80 backdrop-blur-md'
+        )}
+      >
+        <div className={cn('flex items-center justify-between transition-all duration-500', scrolled ? 'h-12' : 'h-16')}>
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <span className="text-accent text-lg font-medium">▲</span>
