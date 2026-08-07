@@ -2,10 +2,12 @@
 
 import { useMemo, useRef } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Sparkles, Float, MeshDistortMaterial } from '@react-three/drei'
 import * as THREE from 'three'
 
 const GOLD = new THREE.Color('oklch(0.76 0.15 75)')
 const GOLD_DIM = new THREE.Color('#6b5220')
+const GOLD_SOFT = new THREE.Color('oklch(0.55 0.1 75)')
 
 function ParticleGeoid({ scrollProgress }: { scrollProgress: React.MutableRefObject<number> }) {
   const groupRef = useRef<THREE.Group>(null)
@@ -119,6 +121,49 @@ function ParticleGeoid({ scrollProgress }: { scrollProgress: React.MutableRefObj
   )
 }
 
+function DriftingGlow({ scrollProgress }: { scrollProgress: React.MutableRefObject<number> }) {
+  const ref = useRef<THREE.Mesh>(null)
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime
+    if (ref.current) {
+      const scroll = scrollProgress.current
+      ref.current.rotation.x = t * 0.05
+      ref.current.rotation.y = t * 0.07
+      ref.current.position.x = Math.sin(t * 0.15) * 1.4 - THREE.MathUtils.lerp(0, 1.2, scroll)
+      ref.current.position.y = Math.cos(t * 0.12) * 0.8
+      ref.current.position.z = -3 - scroll * 2
+    }
+  })
+
+  return (
+    <Float speed={1.2} rotationIntensity={0.3} floatIntensity={0.6}>
+      <mesh ref={ref}>
+        <sphereGeometry args={[1.6, 48, 48]} />
+        <MeshDistortMaterial
+          color={GOLD_SOFT}
+          distort={0.45}
+          speed={1.4}
+          transparent
+          opacity={0.12}
+          roughness={1}
+          depthWrite={false}
+        />
+      </mesh>
+    </Float>
+  )
+}
+
+function CameraDrift() {
+  useFrame((state) => {
+    const t = state.clock.elapsedTime
+    state.camera.position.x = Math.sin(t * 0.08) * 0.25
+    state.camera.position.y = Math.cos(t * 0.06) * 0.15
+    state.camera.lookAt(0, 0, 0)
+  })
+  return null
+}
+
 export function HeroCanvas({ scrollProgress }: { scrollProgress: React.MutableRefObject<number> }) {
   return (
     <div className="absolute inset-0 -z-10">
@@ -128,6 +173,17 @@ export function HeroCanvas({ scrollProgress }: { scrollProgress: React.MutableRe
         gl={{ antialias: true, alpha: true }}
       >
         <ambientLight intensity={0.6} />
+        <CameraDrift />
+        <DriftingGlow scrollProgress={scrollProgress} />
+        <Sparkles
+          count={140}
+          scale={[9, 6, 6]}
+          size={2}
+          speed={0.3}
+          opacity={0.5}
+          color={GOLD}
+          noise={1}
+        />
         <ParticleGeoid scrollProgress={scrollProgress} />
       </Canvas>
     </div>
