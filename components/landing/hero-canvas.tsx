@@ -5,9 +5,9 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { Sparkles, Float, MeshDistortMaterial } from '@react-three/drei'
 import * as THREE from 'three'
 
-const GOLD = new THREE.Color('oklch(0.76 0.15 75)')
+const GOLD = new THREE.Color('#dba84c')
 const GOLD_DIM = new THREE.Color('#6b5220')
-const GOLD_SOFT = new THREE.Color('oklch(0.55 0.1 75)')
+const GOLD_SOFT = new THREE.Color('#8a6a35')
 
 function ParticleGeoid({ scrollProgress }: { scrollProgress: React.MutableRefObject<number> }) {
   const groupRef = useRef<THREE.Group>(null)
