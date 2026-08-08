@@ -9,6 +9,50 @@ const GOLD = new THREE.Color('#dba84c')
 const GOLD_DIM = new THREE.Color('#6b5220')
 const GOLD_SOFT = new THREE.Color('#8a6a35')
 
+/** Rasterizes a "$" glyph and samples `count` points from its filled pixels. */
+function generateDollarPositions(count: number, radius: number): Float32Array {
+  const out = new Float32Array(count * 3)
+  const res = 480
+  const canvas = document.createElement('canvas')
+  canvas.width = res
+  canvas.height = res
+  const ctx = canvas.getContext('2d')
+  if (!ctx) return out
+
+  ctx.clearRect(0, 0, res, res)
+  ctx.fillStyle = '#fff'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.font = '900 400px Georgia, serif'
+  ctx.fillText('$', res / 2, res / 2 + 12)
+
+  const data = ctx.getImageData(0, 0, res, res).data
+  const candidates: { x: number; y: number }[] = []
+  for (let y = 0; y < res; y += 1) {
+    for (let x = 0; x < res; x += 1) {
+      if (data[(y * res + x) * 4 + 3] > 160) candidates.push({ x, y })
+    }
+  }
+
+  // Shuffle once, then sample by cycling through — spreads repeats evenly
+  // across the glyph instead of clumping from pure random draws.
+  for (let i = candidates.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[candidates[i], candidates[j]] = [candidates[j], candidates[i]]
+  }
+
+  for (let i = 0; i < count; i++) {
+    const p = candidates.length ? candidates[i % candidates.length] : { x: res / 2, y: res / 2 }
+    const nx = (p.x - res / 2) / (res / 2)
+    const ny = -(p.y - res / 2) / (res / 2)
+    out[i * 3] = nx * radius
+    out[i * 3 + 1] = ny * radius
+    out[i * 3 + 2] = 0
+  }
+
+  return out
+}
+
 function ParticleGeoid({ scrollProgress }: { scrollProgress: React.MutableRefObject<number> }) {
   const groupRef = useRef<THREE.Group>(null)
   const pointsRef = useRef<THREE.Points>(null)
@@ -19,7 +63,7 @@ function ParticleGeoid({ scrollProgress }: { scrollProgress: React.MutableRefObj
   const COUNT = 900
   const RADIUS = 2.4
 
-  const { positions, basePositions, linePositions, lineBase } = useMemo(() => {
+  const { positions, basePositions, dollarPositions, linePositions, lineBase } = useMemo(() => {
     const positions = new Float32Array(COUNT * 3)
     const basePositions = new Float32Array(COUNT * 3)
 
@@ -72,44 +116,63 @@ function ParticleGeoid({ scrollProgress }: { scrollProgress: React.MutableRefObj
       }
     }
 
-    return { positions, basePositions, linePositions, lineBase: linePositions.slice(0, linkCount * 6) }
+    const dollarPositions = generateDollarPositions(COUNT, RADIUS * 1.15)
+
+    return { positions, basePositions, dollarPositions, linePositions, lineBase: linePositions.slice(0, linkCount * 6) }
   }, [])
 
-  useFrame((state, delta) => {
+  useFrame((state) => {
     const t = state.clock.elapsedTime
     mouse.current.x += (state.pointer.x - mouse.current.x) * 0.04
     mouse.current.y += (state.pointer.y - mouse.current.y) * 0.04
 
     const scroll = scrollProgress.current
-    // Rises through the first half (dispersing outward, like a shatter),
-    // then pulls back into a dense core through the second half.
-    const burst = scroll < 0.5 ? scroll * 2 : (1 - scroll) * 2
+
+    // Timeline across the pinned scroll:
+    // 0.00-0.15 sphere forms · 0.15-0.35 morphs into a $ sign
+    // 0.35-0.55 holds the $ shape · 0.55-0.78 bursts apart
+    // 0.78-1.00 collapses into a dense core (and fades out, in hero.tsx)
+    const formT = THREE.MathUtils.smoothstep(scroll, 0.15, 0.35)
+    const disperseT = THREE.MathUtils.smoothstep(scroll, 0.55, 0.78)
+    const collapseT = THREE.MathUtils.smoothstep(scroll, 0.78, 1.0)
+
+    // Rotation and mouse parallax fade out as the $ forms, so it sits
+    // dead-on to the camera and reads clearly while held, then both
+    // resume once it bursts apart again.
+    const rotateScroll = scroll < 0.15 ? scroll : scroll < 0.55 ? 0.15 : 0.15 + (scroll - 0.55)
+    const formHold = THREE.MathUtils.smoothstep(scroll, 0.1, 0.3) * (1 - disperseT)
+    const faceCamera = 1 - formHold
 
     if (groupRef.current) {
-      groupRef.current.rotation.y = t * 0.08 + mouse.current.x * 0.4 + scroll * Math.PI * 2.4
-      groupRef.current.rotation.x = t * 0.03 + mouse.current.y * 0.25 + scroll * 1.6
-      groupRef.current.position.x = mouse.current.x * 0.3 + THREE.MathUtils.lerp(0, viewport.width * 0.14, scroll)
+      groupRef.current.rotation.y = (t * 0.05 + mouse.current.x * 0.3 + rotateScroll * Math.PI * 1.4) * faceCamera
+      groupRef.current.rotation.x = (t * 0.02 + mouse.current.y * 0.2 + rotateScroll * 0.8) * faceCamera
+      groupRef.current.position.x =
+        mouse.current.x * 0.3 * faceCamera + THREE.MathUtils.lerp(0, viewport.width * 0.1, scroll)
       groupRef.current.position.z = THREE.MathUtils.lerp(0, -2.2, scroll)
-      const s = THREE.MathUtils.lerp(1, 0.4, scroll)
-      groupRef.current.scale.setScalar(s)
+      groupRef.current.scale.setScalar(THREE.MathUtils.lerp(1, 0.4, collapseT))
     }
 
     if (pointsRef.current) {
       const arr = pointsRef.current.geometry.attributes.position.array as Float32Array
-      const spread = 1 + burst * 1.3
+      const spread = 1 + disperseT * 1.3
       for (let i = 0; i < COUNT; i++) {
         const idx = i * 3
-        const breathe = (1 + Math.sin(t * 0.6 + i * 0.15) * 0.02) * spread
-        arr[idx] = basePositions[idx] * breathe
-        arr[idx + 1] = basePositions[idx + 1] * breathe
-        arr[idx + 2] = basePositions[idx + 2] * breathe
+        const breathe = 1 + Math.sin(t * 0.6 + i * 0.15) * 0.015
+        const bx = THREE.MathUtils.lerp(basePositions[idx], dollarPositions[idx], formT)
+        const by = THREE.MathUtils.lerp(basePositions[idx + 1], dollarPositions[idx + 1], formT)
+        const bz = THREE.MathUtils.lerp(basePositions[idx + 2], dollarPositions[idx + 2], formT)
+        arr[idx] = bx * breathe * spread
+        arr[idx + 1] = by * breathe * spread
+        arr[idx + 2] = bz * breathe * spread
       }
       pointsRef.current.geometry.attributes.position.needsUpdate = true
     }
 
     if (linesRef.current) {
       const mat = linesRef.current.material as THREE.LineBasicMaterial
-      mat.opacity = THREE.MathUtils.lerp(0.35, 0.05, burst)
+      // Connective lines would clutter the glyph, so fade them out while
+      // it forms/holds, then let them fade back only slightly on burst.
+      mat.opacity = THREE.MathUtils.lerp(0.35, 0.04, Math.max(formT, disperseT))
     }
   })
 
@@ -119,7 +182,7 @@ function ParticleGeoid({ scrollProgress }: { scrollProgress: React.MutableRefObj
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[positions, 3]} />
         </bufferGeometry>
-        <pointsMaterial size={0.035} color={GOLD} transparent opacity={0.85} sizeAttenuation depthWrite={false} />
+        <pointsMaterial size={0.05} color={GOLD} transparent opacity={0.9} sizeAttenuation depthWrite={false} />
       </points>
       <lineSegments ref={linesRef}>
         <bufferGeometry>
@@ -188,11 +251,11 @@ export function HeroCanvas({ scrollProgress }: { scrollProgress: React.MutableRe
         <CameraDrift scrollProgress={scrollProgress} />
         <DriftingGlow scrollProgress={scrollProgress} />
         <Sparkles
-          count={140}
+          count={90}
           scale={[9, 6, 6]}
-          size={2}
+          size={1.6}
           speed={0.3}
-          opacity={0.5}
+          opacity={0.3}
           color={GOLD}
           noise={1}
         />
