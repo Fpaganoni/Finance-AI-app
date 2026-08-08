@@ -80,26 +80,36 @@ function ParticleGeoid({ scrollProgress }: { scrollProgress: React.MutableRefObj
     mouse.current.x += (state.pointer.x - mouse.current.x) * 0.04
     mouse.current.y += (state.pointer.y - mouse.current.y) * 0.04
 
+    const scroll = scrollProgress.current
+    // Rises through the first half (dispersing outward, like a shatter),
+    // then pulls back into a dense core through the second half.
+    const burst = scroll < 0.5 ? scroll * 2 : (1 - scroll) * 2
+
     if (groupRef.current) {
-      const scroll = scrollProgress.current
-      groupRef.current.rotation.y = t * 0.08 + mouse.current.x * 0.4 + scroll * Math.PI * 0.9
-      groupRef.current.rotation.x = t * 0.03 + mouse.current.y * 0.25 + scroll * 0.6
+      groupRef.current.rotation.y = t * 0.08 + mouse.current.x * 0.4 + scroll * Math.PI * 2.4
+      groupRef.current.rotation.x = t * 0.03 + mouse.current.y * 0.25 + scroll * 1.6
       groupRef.current.position.x = mouse.current.x * 0.3 + THREE.MathUtils.lerp(0, viewport.width * 0.14, scroll)
-      groupRef.current.position.z = THREE.MathUtils.lerp(0, -1.5, scroll)
-      const s = THREE.MathUtils.lerp(1, 0.72, scroll)
+      groupRef.current.position.z = THREE.MathUtils.lerp(0, -2.2, scroll)
+      const s = THREE.MathUtils.lerp(1, 0.4, scroll)
       groupRef.current.scale.setScalar(s)
     }
 
     if (pointsRef.current) {
       const arr = pointsRef.current.geometry.attributes.position.array as Float32Array
+      const spread = 1 + burst * 1.3
       for (let i = 0; i < COUNT; i++) {
         const idx = i * 3
-        const breathe = 1 + Math.sin(t * 0.6 + i * 0.15) * 0.02
+        const breathe = (1 + Math.sin(t * 0.6 + i * 0.15) * 0.02) * spread
         arr[idx] = basePositions[idx] * breathe
         arr[idx + 1] = basePositions[idx + 1] * breathe
         arr[idx + 2] = basePositions[idx + 2] * breathe
       }
       pointsRef.current.geometry.attributes.position.needsUpdate = true
+    }
+
+    if (linesRef.current) {
+      const mat = linesRef.current.material as THREE.LineBasicMaterial
+      mat.opacity = THREE.MathUtils.lerp(0.35, 0.05, burst)
     }
   })
 
@@ -154,11 +164,13 @@ function DriftingGlow({ scrollProgress }: { scrollProgress: React.MutableRefObje
   )
 }
 
-function CameraDrift() {
+function CameraDrift({ scrollProgress }: { scrollProgress: React.MutableRefObject<number> }) {
   useFrame((state) => {
     const t = state.clock.elapsedTime
+    const scroll = scrollProgress.current
     state.camera.position.x = Math.sin(t * 0.08) * 0.25
     state.camera.position.y = Math.cos(t * 0.06) * 0.15
+    state.camera.position.z = THREE.MathUtils.lerp(6.2, 3.6, scroll)
     state.camera.lookAt(0, 0, 0)
   })
   return null
@@ -173,7 +185,7 @@ export function HeroCanvas({ scrollProgress }: { scrollProgress: React.MutableRe
         gl={{ antialias: true, alpha: true }}
       >
         <ambientLight intensity={0.6} />
-        <CameraDrift />
+        <CameraDrift scrollProgress={scrollProgress} />
         <DriftingGlow scrollProgress={scrollProgress} />
         <Sparkles
           count={140}
